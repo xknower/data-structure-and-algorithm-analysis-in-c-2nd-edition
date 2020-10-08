@@ -1,158 +1,158 @@
-        #include "fatal.h"
-        #include "hashquad.h"
-        #include <stdlib.h>
-        
-        #define MinTableSize (10)
+#include "fatal.h"
+#include "hashquad.h"
+#include <stdlib.h>
 
-        enum KindOfEntry { Legitimate, Empty, Deleted };
+#define MinTableSize (10)
 
-        struct HashEntry
-        {
-            ElementType      Element;
-            enum KindOfEntry Info;
-        };
+enum KindOfEntry
+{
+    Legitimate,
+    Empty,
+    Deleted
+};
 
-        typedef struct HashEntry Cell;
+struct HashEntry
+{
+    ElementType Element;
+    enum KindOfEntry Info;
+};
 
-        /* Cell *TheCells will be an array of */
-        /* HashEntry cells, allocated later */
-        struct HashTbl
-        {
-            int TableSize;
-            Cell *TheCells;
-        };
+typedef struct HashEntry Cell;
 
-        /* Return next prime; assume N >= 10 */
+/* Cell *TheCells will be an array of */
+/* HashEntry cells, allocated later */
+struct HashTbl
+{
+    int TableSize;
+    Cell *TheCells;
+};
 
-        static int
-        NextPrime( int N )
-        {
-            int i;
+/* Return next prime; assume N >= 10 */
 
-            if( N % 2 == 0 )
-                N++;
-            for( ; ; N += 2 )
-            {
-                for( i = 3; i * i <= N; i += 2 )
-                    if( N % i == 0 )
-                        goto ContOuter;  /* Sorry about this! */
-                return N;
-              ContOuter: ;
-            }
-        }
+static int
+NextPrime(int N)
+{
+    int i;
 
-        /* Hash function for ints */
-        Index
-        Hash( ElementType Key, int TableSize )
-        {
-            return Key % TableSize;
-        }
+    if (N % 2 == 0)
+        N++;
+    for (;; N += 2)
+    {
+        for (i = 3; i * i <= N; i += 2)
+            if (N % i == 0)
+                goto ContOuter; /* Sorry about this! */
+        return N;
+    ContOuter:;
+    }
+}
+
+/* Hash function for ints */
+Index Hash(ElementType Key, int TableSize)
+{
+    return Key % TableSize;
+}
 
 /* START: fig5_15.txt */
-        HashTable
-        InitializeTable( int TableSize )
-        {
-            HashTable H;
-            int i;
+HashTable
+InitializeTable(int TableSize)
+{
+    HashTable H;
+    int i;
 
-/* 1*/      if( TableSize < MinTableSize )
-            {
-/* 2*/          Error( "Table size too small" );
-/* 3*/          return NULL;
-            }
+    if (TableSize < MinTableSize) /* 1*/
+    {
+        Error("Table size too small"); /* 2*/
+        return NULL;                   /* 3*/
+    }
 
-            /* Allocate table */
-/* 4*/      H = malloc( sizeof( struct HashTbl ) );
-/* 5*/      if( H == NULL )
-/* 6*/          FatalError( "Out of space!!!" );
+    /* Allocate table */
+    H = malloc(sizeof(struct HashTbl)); /* 4*/
+    if (H == NULL)                      /* 5*/
+        FatalError("Out of space!!!");  /* 6*/
 
-/* 7*/      H->TableSize = NextPrime( TableSize );
+    H->TableSize = NextPrime(TableSize); /* 7*/
 
-            /* Allocate array of Cells */
-/* 8*/      H->TheCells = malloc( sizeof( Cell ) * H->TableSize );
-/* 9*/      if( H->TheCells == NULL )
-/*10*/          FatalError( "Out of space!!!" );
+    /* Allocate array of Cells */
+    H->TheCells = malloc(sizeof(Cell) * H->TableSize); /* 8*/
+    if (H->TheCells == NULL)                           /* 9*/
+        FatalError("Out of space!!!");                 /*10*/
 
-/*11*/      for( i = 0; i < H->TableSize; i++ )
-/*12*/          H->TheCells[ i ].Info = Empty;
+    for (i = 0; i < H->TableSize; i++) /*11*/
+        H->TheCells[i].Info = Empty;   /*12*/
 
-/*13*/      return H;
-        }
+    return H; /*13*/
+}
 /* END */
 
 /* START: fig5_16.txt */
-        Position
-        Find( ElementType Key, HashTable H )
-        {
-            Position CurrentPos;
-            int CollisionNum;
+Position
+Find(ElementType Key, HashTable H)
+{
+    Position CurrentPos;
+    int CollisionNum;
 
-/* 1*/      CollisionNum = 0;
-/* 2*/      CurrentPos = Hash( Key, H->TableSize );
-/* 3*/      while( H->TheCells[ CurrentPos ].Info != Empty &&
-                   H->TheCells[ CurrentPos ].Element != Key )
-                            /* Probably need strcmp!! */
-            {
-/* 4*/          CurrentPos += 2 * ++CollisionNum - 1;
-/* 5*/          if( CurrentPos >= H->TableSize )
-/* 6*/              CurrentPos -= H->TableSize;
-            }
-/* 7*/      return CurrentPos;
-        }
+    CollisionNum = 0;                               /* 1*/
+    CurrentPos = Hash(Key, H->TableSize);           /* 2*/
+    while (H->TheCells[CurrentPos].Info != Empty && /* 3*/
+           H->TheCells[CurrentPos].Element != Key)
+    /* Probably need strcmp!! */
+    {
+        CurrentPos += 2 * ++CollisionNum - 1; /* 4*/
+        if (CurrentPos >= H->TableSize)       /* 5*/
+            CurrentPos -= H->TableSize;       /* 6*/
+    }
+    return CurrentPos; /* 7*/
+}
 /* END */
 
 /* START: fig5_17.txt */
-        void
-        Insert( ElementType Key, HashTable H )
-        {
-            Position Pos;
+void Insert(ElementType Key, HashTable H)
+{
+    Position Pos;
 
-            Pos = Find( Key, H );
-            if( H->TheCells[ Pos ].Info != Legitimate )
-            {
-                /* OK to insert here */
-                H->TheCells[ Pos ].Info = Legitimate;
-                H->TheCells[ Pos ].Element = Key;
-                         /* Probably need strcpy! */
-            }
-        }
+    Pos = Find(Key, H);
+    if (H->TheCells[Pos].Info != Legitimate)
+    {
+        /* OK to insert here */
+        H->TheCells[Pos].Info = Legitimate;
+        H->TheCells[Pos].Element = Key;
+        /* Probably need strcpy! */
+    }
+}
 /* END */
 
 /* START: fig5_22.txt */
-        HashTable
-        Rehash( HashTable H )
-        {
-            int i, OldSize;
-            Cell *OldCells;
+HashTable
+Rehash(HashTable H)
+{
+    int i, OldSize;
+    Cell *OldCells;
 
-/* 1*/      OldCells = H->TheCells;
-/* 2*/      OldSize  = H->TableSize;
+    OldCells = H->TheCells; /* 1*/
+    OldSize = H->TableSize; /* 2*/
 
-            /* Get a new, empty table */
-/* 3*/      H = InitializeTable( 2 * OldSize );
+    /* Get a new, empty table */
+    H = InitializeTable(2 * OldSize); /* 3*/
 
-            /* Scan through old table, reinserting into new */
-/* 4*/      for( i = 0; i < OldSize; i++ )
-/* 5*/          if( OldCells[ i ].Info == Legitimate )
-/* 6*/              Insert( OldCells[ i ].Element, H );
+    /* Scan through old table, reinserting into new */
+    for (i = 0; i < OldSize; i++)           /* 4*/
+        if (OldCells[i].Info == Legitimate) /* 5*/
+            Insert(OldCells[i].Element, H); /* 6*/
 
-/* 7*/      free( OldCells );
+    free(OldCells); /* 7*/
 
-/* 8*/      return H;
-        }
+    return H; /* 8*/
+}
 /* END */
 
+ElementType
+Retrieve(Position P, HashTable H)
+{
+    return H->TheCells[P].Element;
+}
 
-
-        ElementType
-        Retrieve( Position P, HashTable H )
-        {
-            return H->TheCells[ P ].Element;
-        }
-
-        void
-        DestroyTable( HashTable H )
-        {
-            free( H->TheCells );
-            free( H );
-        }
+void DestroyTable(HashTable H)
+{
+    free(H->TheCells);
+    free(H);
+}

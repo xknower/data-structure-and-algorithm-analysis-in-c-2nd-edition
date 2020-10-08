@@ -1,154 +1,151 @@
-       #include "fatal.h"
-       #include "hashsep.h"
-       #include <stdlib.h>
-       
-       #define MinTableSize (10)
+#include "fatal.h"
+#include "hashsep.h"
+#include <stdlib.h>
 
-        struct ListNode
-        {
-            ElementType Element;
-            Position    Next;
-        };
+#define MinTableSize (10)
 
-        typedef Position List;
+struct ListNode
+{
+    ElementType Element;
+    Position Next;
+};
 
-        /* List *TheList will be an array of lists, allocated later */
-        /* The lists use headers (for simplicity), */
-        /* though this wastes space */
-        struct HashTbl
-        {
-            int TableSize;
-            List *TheLists;
-        };
+typedef Position List;
 
-        /* Return next prime; assume N >= 10 */
-        static int
-        NextPrime( int N )
-        {
-            int i;
+/* List *TheList will be an array of lists, allocated later */
+/* The lists use headers (for simplicity), */
+/* though this wastes space */
+struct HashTbl
+{
+    int TableSize;
+    List *TheLists;
+};
 
-            if( N % 2 == 0 )
-                N++;
-            for( ; ; N += 2 )
-            {
-                for( i = 3; i * i <= N; i += 2 )
-                    if( N % i == 0 )
-                        goto ContOuter;  /* Sorry about this! */
-                return N;
-              ContOuter: ;
-            }
-        }
+/* Return next prime; assume N >= 10 */
+static int
+NextPrime(int N)
+{
+    int i;
 
-        /* Hash function for ints */
-        Index
-        Hash( ElementType Key, int TableSize )
-        {
-            return Key % TableSize;
-        }
+    if (N % 2 == 0)
+        N++;
+    for (;; N += 2)
+    {
+        for (i = 3; i * i <= N; i += 2)
+            if (N % i == 0)
+                goto ContOuter; /* Sorry about this! */
+        return N;
+    ContOuter:;
+    }
+}
+
+/* Hash function for ints */
+Index Hash(ElementType Key, int TableSize)
+{
+    return Key % TableSize;
+}
 
 /* START: fig5_8.txt */
-        HashTable
-        InitializeTable( int TableSize )
-        {
-            HashTable H;
-            int i;
+HashTable
+InitializeTable(int TableSize)
+{
+    HashTable H;
+    int i;
 
-/* 1*/      if( TableSize < MinTableSize )
-            {
-/* 2*/          Error( "Table size too small" );
-/* 3*/          return NULL;
-            }
+    if (TableSize < MinTableSize) /* 1*/
+    {
+        Error("Table size too small"); /* 2*/
+        return NULL;                   /* 3*/
+    }
 
-            /* Allocate table */
-/* 4*/      H = malloc( sizeof( struct HashTbl ) );
-/* 5*/      if( H == NULL )
-/* 6*/          FatalError( "Out of space!!!" );
+    /* Allocate table */
+    H = malloc(sizeof(struct HashTbl)); /* 4*/
+    if (H == NULL)                      /* 5*/
+        FatalError("Out of space!!!");  /* 6*/
 
-/* 7*/      H->TableSize = NextPrime( TableSize );
+    H->TableSize = NextPrime(TableSize); /* 7*/
 
-            /* Allocate array of lists */
-/* 8*/      H->TheLists = malloc( sizeof( List ) * H->TableSize );
-/* 9*/      if( H->TheLists == NULL )
-/*10*/          FatalError( "Out of space!!!" );
+    /* Allocate array of lists */
+    H->TheLists = malloc(sizeof(List) * H->TableSize); /* 8*/
+    if (H->TheLists == NULL)                           /* 9*/
+        FatalError("Out of space!!!");                 /*10*/
 
-            /* Allocate list headers */
-/*11*/      for( i = 0; i < H->TableSize; i++ )
-            {
-/*12*/          H->TheLists[ i ] = malloc( sizeof( struct ListNode ) );
-/*13*/          if( H->TheLists[ i ] == NULL )
-/*14*/              FatalError( "Out of space!!!" );
-                else
-/*15*/              H->TheLists[ i ]->Next = NULL;
-            }
+    /* Allocate list headers */
+    for (i = 0; i < H->TableSize; i++) /*11*/
+    {
+        H->TheLists[i] = malloc(sizeof(struct ListNode)); /*12*/
+        if (H->TheLists[i] == NULL)                       /*13*/
+            FatalError("Out of space!!!");                /*14*/
+        else
+            H->TheLists[i]->Next = NULL; /*15*/
+    }
 
-/*16*/      return H;
-        }
+    return H; /*16*/
+}
 /* END */
 
 /* START: fig5_9.txt */
-        Position
-        Find( ElementType Key, HashTable H )
-        {
-            Position P;
-            List L;
+Position
+Find(ElementType Key, HashTable H)
+{
+    Position P;
+    List L;
 
-/* 1*/      L = H->TheLists[ Hash( Key, H->TableSize ) ];
-/* 2*/      P = L->Next;
-/* 3*/      while( P != NULL && P->Element != Key )
-                                /* Probably need strcmp!! */
-/* 4*/          P = P->Next;
-/* 5*/      return P;
-        }
+    L = H->TheLists[Hash(Key, H->TableSize)]; /* 1*/
+    P = L->Next;                              /* 2*/
+    while (P != NULL && P->Element != Key)    /* 3*/
+                                              /* Probably need strcmp!! */
+        P = P->Next;                          /* 4*/
+    return P;                                 /* 5*/
+}
 /* END */
 
 /* START: fig5_10.txt */
-        void
-        Insert( ElementType Key, HashTable H )
-        {
-            Position Pos, NewCell;
-            List L;
+void Insert(ElementType Key, HashTable H)
+{
+    Position Pos, NewCell;
+    List L;
 
-/* 1*/      Pos = Find( Key, H );
-/* 2*/      if( Pos == NULL )   /* Key is not found */
-            {
-/* 3*/          NewCell = malloc( sizeof( struct ListNode ) );
-/* 4*/          if( NewCell == NULL )
-/* 5*/              FatalError( "Out of space!!!" );
-                else
-                {
-/* 6*/              L = H->TheLists[ Hash( Key, H->TableSize ) ];
-/* 7*/              NewCell->Next = L->Next;
-/* 8*/              NewCell->Element = Key;  /* Probably need strcpy! */
-/* 9*/              L->Next = NewCell;
-                }
-            }
+    Pos = Find(Key, H);     /* 1*/
+    if (Pos == NULL) /* 2*/ /* Key is not found */
+    {
+        NewCell = malloc(sizeof(struct ListNode)); /* 3*/
+        if (NewCell == NULL)                       /* 4*/
+            FatalError("Out of space!!!");         /* 5*/
+        else
+        {
+            L = H->TheLists[Hash(Key, H->TableSize)]; /* 6*/
+            NewCell->Next = L->Next;                  /* 7*/
+            NewCell->Element = Key; /* 8*/            /* Probably need strcpy! */
+            L->Next = NewCell;                        /* 9*/
         }
+    }
+}
 /* END */
 
-        ElementType
-        Retrieve( Position P )
+ElementType
+Retrieve(Position P)
+{
+    return P->Element;
+}
+
+void DestroyTable(HashTable H)
+{
+    int i;
+
+    for (i = 0; i < H->TableSize; i++)
+    {
+        Position P = H->TheLists[i];
+        Position Tmp;
+
+        while (P != NULL)
         {
-            return P->Element;
+            Tmp = P->Next;
+            free(P);
+            P = Tmp;
         }
+    }
 
-        void
-        DestroyTable( HashTable H )
-        {
-            int i;
-
-            for( i = 0; i < H->TableSize; i++ )
-            {
-                Position P = H->TheLists[ i ];
-                Position Tmp;
-
-                while( P != NULL )
-                {
-                    Tmp = P->Next;
-                    free( P );
-                    P = Tmp;
-                }
-            }
-
-            free( H->TheLists );
-            free( H );
-        }
+    free(H->TheLists);
+    free(H);
+}
