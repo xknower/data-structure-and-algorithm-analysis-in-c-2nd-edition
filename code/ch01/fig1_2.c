@@ -1,3 +1,8 @@
+/**
+ * 递归函数
+ * 
+ * @author xknower
+ */
 #include <stdio.h>
 
 /* START: fig1_2.txt */
@@ -10,7 +15,7 @@ int F(int X)
 }
 /* END */
 
-main()
+int main()
 {
         printf("F(5) = %d\n", F(5));
         return 0;

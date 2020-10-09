@@ -1,3 +1,8 @@
+/**
+ * 打印整数的递归程序
+ * 
+ * @author xknower
+ */
 #include <stdio.h>
 
 #define PrintDigit(Ch) (putchar((Ch) + '0'))
@@ -11,7 +16,7 @@ void PrintOut(unsigned int N) /* Print nonnegative N */
 }
 /* END */
 
-main()
+int main()
 {
     PrintOut(1369);
     putchar('\n');

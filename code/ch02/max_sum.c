@@ -1,13 +1,18 @@
+/**
+ * 最大子序列和问题
+ * 
+ * @author xknower
+ */
 #include <stdio.h>
 
-/* Define one of CubicAlgorithm, QuadraticAlgorithm, NlogNAlgorithm,
- * or LinearAlgorithm to get one algorithm compiled */
-
+// Define one of CubicAlgorithm, QuadraticAlgorithm, NlogNAlgorithm, or LinearAlgorithm to get one algorithm compiled.
+// 定义CubicAlgorithm，QuadraticAlgorithm，NlogNAlgorithm或LinearAlgorithm中的一种以编译一种算法。
 #define NlogNAlgorithm
 
 #ifdef CubicAlgorithm
 
 /* START: fig2_5.txt */
+// 穷尽尝试所有可能, O(N^3)
 int MaxSubsequenceSum(const int A[], int N)
 {
         int ThisSum, MaxSum, i, j, k;
@@ -32,6 +37,7 @@ int MaxSubsequenceSum(const int A[], int N)
 #ifdef QuadraticAlgorithm
 
 /* START: fig2_6.txt */
+// 采用分治(divide-and-conquer)策略, O(N^2)
 int MaxSubsequenceSum(const int A[], int N)
 {
         int ThisSum, MaxSum, i, j;
@@ -113,6 +119,7 @@ int MaxSubsequenceSum(const int A[], int N)
 
 #ifdef LinearAlgorithm
 /* START: fig2_8.txt */
+// 联机算法 (on-line algorithm)
 int MaxSubsequenceSum(const int A[], int N)
 {
         int ThisSum, MaxSum, j;
@@ -133,7 +140,7 @@ int MaxSubsequenceSum(const int A[], int N)
 
 #endif
 
-main()
+int main()
 {
         static int A[] = {4, -3, 5, -2, -1, 2, 6, -2};
 

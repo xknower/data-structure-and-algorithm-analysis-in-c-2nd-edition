@@ -1,3 +1,8 @@
+/**
+ * 无终止递归程序
+ * 
+ * @author xknower
+ */
 #include <stdio.h>
 
 /* START: fig1_3.txt */
@@ -10,8 +15,10 @@ int Bad(unsigned int N)
 }
 /* END */
 
-main()
+int main()
 {
+        printf("Bad(0) = %d\n", Bad(0));
+
         printf("Bad is infinite recursion\n");
         return 0;
 }
